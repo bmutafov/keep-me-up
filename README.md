@@ -13,3 +13,7 @@ To keep with node on your pc you have to perform the following steps:
 This will start the awake process and will run until you stop with with `Ctrl+C`.
 
 You can create .bat scripts or bash aliases to quickly start and stop the process when needed.
+
+# Running via executable
+
+To run via built executables, go to [the releases tab in the repo](https://github.com/mutafow/simple-keep-pc-awake/releases) and download the latest version of the binaries for your machine. Then simply run it when you need to keep your PC awake and close it when you don't!
