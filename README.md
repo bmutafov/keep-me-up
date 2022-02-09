@@ -1,6 +1,7 @@
 # Simple Keep PC Awake
 
-A simple quick program that keeps your PC awake by moving your mouse by 1px diagonally every 30 seconds. It has no interface as is intended to be as simple as possible.
+A simple quick program that keeps your PC awake by moving your mouse by some pixels every time whenever the system has been idling more than the configured time. Default is: moves the mouse 1px back and forth, when the system has been idle for 120 seconds.
+It has no interface as is intended to be as simple as possible.
 
 ## Run via npx
 
@@ -23,7 +24,7 @@ You can create .bat scripts or bash aliases to quickly start and stop the proces
 
 ## Running via executable
 
-To run via built executables, go to [the releases tab in the repo](https://github.com/mutafow/simple-keep-pc-awake/releases) and download the latest version of the binaries for your machine. Then simply run it when you need to keep your PC awake and close it when you don't!
+To run via built executables, go to [the releases tab in the repo](https://github.com/mutafow/simple-keep-pc-awake/releases) and download the latest version of the binaries for your machine. Then simply run it and it will detect when you are idling and react accordingly. The executable will always use the default settings.
 
 ## Options
 
@@ -36,11 +37,11 @@ npx simple-keep-pc-awake [options]
 
     --quiet               quiet mode, does not output any logs (default: false)
     --offset              by how many pixels should the mouse move (default: 1)
-    --interval            how much time should pass before mouse is moved again, in seconds (default: 30s)
+    --max-idle            how much time should pass after system is idling before the script moves the mouse, in seconds (default: 120s)
 
   Examples:
 
     npx simple-keep-pc-awake --quiet --offset 5             moves the cursor by 5px each 30 seconds, in quiet mode
-    npx simple-keep-pc-awake --offset 5 --interval 100      moves the cursor by 5px each 100 seconds
-    npx simple-keep-pc-awake                                default behavior, moves the cursor by 1px every 30 seconds
+    npx simple-keep-pc-awake --offset 5 --max-idle 300      moves the cursor by 5px each 300 seconds (5 minutes)
+    npx simple-keep-pc-awake                                default behavior, moves the cursor by 1px after 120 seconds of idling
 ```
