@@ -1,4 +1,6 @@
+#!/usr/bin/env node
 //@ts-check
+
 const { mouse, Point } = require("@nut-tree/nut-js");
 
 /**
@@ -36,6 +38,7 @@ const mouseMover = async (offset) => {
   const prevPosition = await mouse.getPosition();
   const coordinates = new Point(prevPosition.x + offset, prevPosition.y + offset);
   await mouse.setPosition(coordinates);
+
   setTimeout(() => {
     mouseMover(offset * -1);
   }, 30_000);

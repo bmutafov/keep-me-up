@@ -1,5 +1,3 @@
 /awake.bat
-/Awake.exe
-/index-linux
-/index-macos
-/node_modules
+/build
+node_modules
