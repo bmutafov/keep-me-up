@@ -1,14 +1,20 @@
 {
   "name": "simple-keep-pc-awake",
   "version": "1.0.1",
-  "description": "",
+  "description": "A simple way to keep your PC awake with no configuration and setup.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "bin": "index.js",
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "awake",
+    "keep pc awake",
+    "mouse mover",
+    "lightweight",
+    "simple awake"
+  ],
+  "author": "Boris Mutafov",
   "license": "ISC",
   "dependencies": {
     "@nut-tree/nut-js": "^2.0.1"
