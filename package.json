@@ -1,6 +1,6 @@
 {
   "name": "simple-keep-pc-awake",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "A simple way to keep your PC awake with no configuration and setup.",
   "main": "index.js",
   "scripts": {
