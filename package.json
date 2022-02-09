@@ -4,7 +4,8 @@
   "description": "A simple way to keep your PC awake with no configuration and setup.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "publish": "npm publish --access public"
   },
   "bin": "index.js",
   "keywords": [
