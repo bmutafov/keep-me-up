@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "publish": "npm publish --access public"
+    "publish-npm": "npm publish --access public"
   },
   "bin": "index.js",
   "keywords": [
