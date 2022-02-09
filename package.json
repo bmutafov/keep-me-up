@@ -19,5 +19,8 @@
   "license": "ISC",
   "dependencies": {
     "@nut-tree/nut-js": "^2.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.16"
   }
 }
