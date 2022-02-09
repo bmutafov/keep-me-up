@@ -2,8 +2,12 @@
 //@ts-check
 
 /** Import nut-js which handles the mouse-moving functionalities */
-const { mouse, Point } = require("@nut-tree/nut-js");
+const { mouse, Point, sleep } = require("@nut-tree/nut-js");
+const chalk = require("chalk");
 const desktopIdle = require("desktop-idle");
+const figlet = require("figlet");
+const gradient = require("gradient-string");
+const { version } = require("./package.json");
 
 /** Read the command line arguments */
 const args = process.argv.slice(2);
@@ -26,28 +30,13 @@ const toDoubleDigit = (digit) => {
 };
 
 /**
- * Returns the current date as HH:mm:ss format
- * @returns {string} HH:mm:ss format of the current date
+ * Transform seconds to display time in the format `HH:mm:ss`
+ * @param {number} seconds
+ * @returns {string} The display time to be shown
  */
-const now = () => {
-  const dateNow = new Date();
-  const hours = toDoubleDigit(dateNow.getHours());
-  const minutes = toDoubleDigit(dateNow.getMinutes());
-  const seconds = toDoubleDigit(dateNow.getSeconds());
-
-  return `${hours}:${minutes}:${seconds}`;
+const secondsToDisplayTime = (seconds) => {
+  return new Date(seconds * 1000).toISOString().substr(11, 8);
 };
-
-/**
- * Searches the args for --quiet param and if found should return true to surpass console.logs
- */
-const isQuietMode = args.some((arg) => arg === "--quiet");
-
-/**
- * console.logs the message if quiet mode is off
- * @param {string} message
- */
-const log = (message) => (!isQuietMode ? console.log(message) : null);
 
 /**
  * Extracts argument from the process args with the key provided
@@ -106,39 +95,109 @@ const getMaxIdleTime = () => {
   };
 };
 
+/** Returns a figlet welcome heading message */
+const getFigletWelcomeMessage = () => {
+  return new Promise((resolve, reject) => {
+    figlet("SIMPLE-KEEP-PC-AWAKE", (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+};
+
 /**
- * Moves the mouse cursor by X amount of pixels
- * @param {number} offset How many pixels should the mouse be moved by
- * @param {IMaxIdleTime} maxIdleTime How many milliseconds to wait before moving the mouse again
+ * Return information to be written in the header.
+ * * To add new info add it to the welcomeSubheading object
+ * @returns {Array} Array of strings which follow the {label} : {value} format.
  */
-const keepAwake = async (offset, maxIdleTime) => {
-  /** Check if the idle time of the machine is higher than the max idle time */
-  if (desktopIdle.getIdleTime() >= maxIdleTime.seconds) {
-    log(`💤\x1b[33m ${now()}\x1b[0m  System idling... Moving mouse`);
+const getWelcomeSubheadings = () => {
+  const welcomeSubheading = {
+    Version: version,
+    Author: "Boris Mutafov",
+  };
 
-    /** Get last position of the cursor and move it by the given offset */
-    const prevPosition = await mouse.getPosition();
-    const coordinates = new Point(prevPosition.x + offset, prevPosition.y + offset);
-    await mouse.setPosition(coordinates);
-  }
-
-  /** Call the function recursively again to check after the max idle time */
-  setTimeout(() => {
-    /** Multiply offset by -1 to switch between 2 positions of the cursor (move it one direction and then back the same direction) */
-    keepAwake(offset * -1, maxIdleTime);
-  }, maxIdleTime.milliseconds);
+  return Object.entries(welcomeSubheading).map(([key, value]) => `${key}: ${gradient(["#11998e", "#38ef7d"])(value)}`);
 };
 
-/** Executed on startup. Should start all needed utilities for the wake keeper. */
-const start = () => {
-  const moveOffset = getMoveOffset();
+// start();
+const run = async () => {
+  /** Write the heading message with the app name */
+  const welcomeMessage = await getFigletWelcomeMessage();
+  console.log(gradient(["#FC466B", "#3F5EFB"])(welcomeMessage));
+
+  /** Log the subheading, which includes version, author, and settings */
+  console.log(
+    [
+      ...getWelcomeSubheadings(),
+      `Move offset: ${gradient(["#CAC531", "#F3F9A7"])(getMoveOffset().toString() + " pixels")}`,
+      `Max idle time: ${gradient(["#CAC531", "#F3F9A7"])(getMaxIdleTime().seconds.toString() + " seconds")}`,
+    ].join("  |  ") + "\n"
+  );
+
+  /** Save settings so we don't do unnecessary operations */
   const maxIdleTime = getMaxIdleTime();
+  const moveOffset = getMoveOffset();
 
-  log("🚀\x1b[32m success   \x1b[0mStarted simple-keep-pc-awake");
-  log(`⚙ \x1b[34m info      \x1b[0mMouse move offset:     ${moveOffset} pixels`);
-  log(`⚙ \x1b[34m info      \x1b[0mMax idle time:         ${maxIdleTime.seconds} seconds`);
+  /** Default value is not idling */
+  let isIdle = false;
 
-  keepAwake(moveOffset, maxIdleTime);
+  /** Set the default idle time label and write it to console */
+  const idleTimeString = "Idle time: ";
+  process.stdout.write(idleTimeString);
+
+  /** Hide the terminal cursor */
+  process.stderr.write("\x1B[?25l");
+
+  for (let i = 0; true; i++) {
+    /** Get current system idle time */
+    const idleTime = desktopIdle.getIdleTime();
+
+    /** Display the info line and keep it updated every second */
+    const displayIdleTime = i < 5 ? "<5" : secondsToDisplayTime(i);
+    /** Move the cursor to where the default "Idle time" string ends */
+    process.stdout.cursorTo(idleTimeString.length);
+    /** Clear everything after */
+    process.stdout.clearLine(1);
+    /** Write the remaining time */
+    process.stdout.write(chalk.yellow(displayIdleTime + "s"));
+    /** Write the status label */
+    process.stdout.write("  |  Status: ");
+    /** Write the status value */
+    process.stdout.write(isIdle ? chalk.green("ON") : chalk.red("OFF"));
+
+    /** If we have reached the maximum idle time */
+    if (idleTime >= maxIdleTime.seconds) {
+      /** Get last position of the cursor and move it by the given offset */
+      const prevPosition = await mouse.getPosition();
+      const coordinates = new Point(prevPosition.x + moveOffset, prevPosition.y + moveOffset);
+      await mouse.setPosition(coordinates);
+
+      /** If the app hasn't been set as idling so far, set it */
+      if (!isIdle) {
+        isIdle = true;
+      }
+    }
+
+    /** If the idle time is 0 and the counter is more than 0, it means the user has been active during the last 0 second */
+    if (idleTime === 0 && i > 0) {
+      /** If the app has been idling, change the status to false*/
+      if (isIdle) {
+        isIdle = false;
+      }
+
+      /**
+       * Reset the idle counter.
+       * Setting it to -1 because we have i++ in the end of the for, which will return it to 0
+       */
+      i = -1;
+    }
+
+    /** Sleep 1 second */
+    await sleep(1_000);
+  }
 };
 
-start();
+run();

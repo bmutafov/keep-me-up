@@ -35,13 +35,12 @@ npx simple-keep-pc-awake [options]
 
   Options:
 
-    --quiet               quiet mode, does not output any logs (default: false)
     --offset              by how many pixels should the mouse move (default: 1)
     --max-idle            how much time should pass after system is idling before the script moves the mouse, in seconds (default: 120s)
 
   Examples:
 
-    npx simple-keep-pc-awake --quiet --offset 5             moves the cursor by 5px each 30 seconds, in quiet mode
+    npx simple-keep-pc-awake --offset 5                     moves the cursor by 5px each 30 seconds
     npx simple-keep-pc-awake --offset 5 --max-idle 300      moves the cursor by 5px each 300 seconds (5 minutes)
     npx simple-keep-pc-awake                                default behavior, moves the cursor by 1px after 120 seconds of idling
 ```
