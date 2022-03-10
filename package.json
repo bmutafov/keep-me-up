@@ -1,6 +1,6 @@
 {
   "name": "keep-me-up",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "A simple way to keep your PC awake with no configuration and setup.",
   "main": "index.js",
   "homepage": "https://github.com/mutafow/keep-me-up#readme",
