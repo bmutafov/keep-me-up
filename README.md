@@ -3,6 +3,9 @@
 <p align="center">
   <img src="https://i.ibb.co/Xj8CNfQ/Custom-Size-1.png" />
 </p>
+<p align="center">
+  <img src="https://i.ibb.co/H7YPFpK/demo-gif.gif" />
+</p>
 
 Simple NodeJS script, which keeps your PC awake when you are away. It detects when there has not been activity since certain threshold and starts moving the mouse to prevent it from sleeping or showing away status.
 
