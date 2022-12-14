@@ -53,13 +53,13 @@ npx keep-me-up [options]
   Options:
 
     --offset              by how many pixels should the mouse move (default: 1)
-    --max-idle            how much time should pass after system is idling before the script moves the mouse, in seconds (default: 120s)
-    --random              if provided the mouse will be moved by random amount each time. Overwrites --offset command
+    --interval            how much time should pass before the mouse cursor is moved (default: 60s)
+    --random              if provided the mouse will be moved by random amount each time (between 1 and 600). Overwrites --offset command
 
   Examples:
 
     npx keep-me-up --offset 5                     moves the cursor by 5px each 30 seconds
-    npx keep-me-up --offset 5 --max-idle 300      moves the cursor by 5px each 300 seconds (5 minutes)
+    npx keep-me-up --offset 5 --interval 300      moves the cursor by 5px each 300 seconds (5 minutes)
     npx keep-me-up --random                       will move your mouse by random amount of pixels, every 120 seconds
     npx keep-me-up                                default behavior, moves the cursor by 1px after 120 seconds of idling
 ```

@@ -3,7 +3,6 @@
 
 /** Import nut-js which handles the mouse-moving functionalities */
 const { mouse, Point, sleep } = require("@nut-tree/nut-js");
-const desktopIdle = require("desktop-idle");
 const { version } = require("./package.json");
 
 const colored = {
@@ -17,7 +16,7 @@ const args = process.argv.slice(2);
 
 const DEFAULTS = {
   OFFSET_PX: 1,
-  MAX_IDLE_SEC: 120,
+  INTERVAL: 60,
 };
 
 /**
@@ -70,19 +69,19 @@ const getMoveOffset = () => {
 };
 
 /**
- * @typedef {Object} IMaxIdleTime
+ * @typedef {Object} ITimeInterval
  * @property {number} seconds - The time which the computer can stay idle in seconds
  * @property {number} milliseconds - The time which the computer can stay idle in milliseconds
  *
  * Extracts the interval value from the --max-idle argument
- * @returns {IMaxIdleTime} Amount of MS to wait before moving the cursor after system is idle. User defined or default.
+ * @returns {ITimeInterval} Amount of MS to wait before moving the cursor after system is idle. User defined or default.
  */
-const getMaxIdleTime = () => {
-  const maxIdleTime = getArgParam("--max-idle", DEFAULTS.MAX_IDLE_SEC);
+const getIdleTimeInterval = () => {
+  const intervalTime = getArgParam("--interval", DEFAULTS.INTERVAL);
 
   return {
-    seconds: maxIdleTime,
-    milliseconds: maxIdleTime * 1_000,
+    seconds: intervalTime,
+    milliseconds: intervalTime * 1_000,
   };
 };
 
@@ -115,13 +114,12 @@ const getRandomOffset = (maxLimit) => {
   return Math.floor(Math.random() * maxLimit * 2) - maxLimit;
 };
 
-// start();
 const run = async () => {
   /** Write the heading message with the app name */
   console.log(getFigletWelcomeMessage());
 
   /** Save settings so we don't do unnecessary operations */
-  const maxIdleTime = getMaxIdleTime();
+  const interval = getIdleTimeInterval();
   const moveOffset = getMoveOffset();
   const isRandom = getIsRandom();
 
@@ -135,9 +133,7 @@ const run = async () => {
   process.stdout.write(`Ver: ${colored.yellow(version)}\n`);
 
   process.stdout.cursorTo(4);
-  process.stdout.write(
-    `Max Idle: ${colored.yellow(maxIdleTime.seconds + "s")}`
-  );
+  process.stdout.write(`Interval: ${colored.yellow(interval.seconds + "s")}`);
   process.stdout.cursorTo(40);
   process.stdout.write(`By:  ${colored.yellow("bmutafov")}\n`);
 
@@ -145,9 +141,6 @@ const run = async () => {
   process.stdout.write(
     "___________________________________________________\n\n"
   );
-
-  /** Default value is not idling */
-  let isIdle = false;
 
   /** Set the default idle time label and write it to console */
   process.stdout.cursorTo(4);
@@ -157,12 +150,9 @@ const run = async () => {
   /** Hide the terminal cursor */
   process.stderr.write("\x1B[?25l");
 
-  for (let i = 0; true; i++) {
-    /** Get current system idle time */
-    const idleTime = desktopIdle.getIdleTime();
-
+  for (let i = 0, moveSign = +1; true; i++) {
     /** Display the info line and keep it updated every second */
-    const displayIdleTime = i < 5 ? "<5" : secondsToDisplayTime(i);
+    const displayIdleTime = secondsToDisplayTime(i);
     /** Move the cursor to where the default "Idle time" string ends */
     process.stdout.cursorTo(idleTimeString.length + 4);
     /** Clear everything after */
@@ -171,38 +161,22 @@ const run = async () => {
     process.stdout.write(colored.yellow(displayIdleTime + "s"));
     process.stdout.cursorTo(40);
     /** Write the status value */
-    process.stdout.write(
-      isIdle ? colored.green("Active") : colored.red("Bellow threshold")
-    );
+    process.stdout.write(colored.green("Active"));
 
     /** If we have reached the maximum idle time */
-    if (idleTime >= maxIdleTime.seconds) {
+    if (i % interval.seconds === 0) {
+      const nextMoveOffsetAbs = isRandom ? getRandomOffset(600) : moveOffset;
+      const nextMoveOffset = nextMoveOffsetAbs * moveSign;
+      moveSign *= -1;
+
       /** Get last position of the cursor and move it by the given offset */
       const prevPosition = await mouse.getPosition();
       const coordinates = new Point(
-        prevPosition.x + isRandom ? getRandomOffset(600) : moveOffset,
-        prevPosition.y + isRandom ? getRandomOffset(600) : moveOffset
+        prevPosition.x + nextMoveOffset,
+        prevPosition.y + nextMoveOffset
       );
+
       await mouse.setPosition(coordinates);
-
-      /** If the app hasn't been set as idling so far, set it */
-      if (!isIdle) {
-        isIdle = true;
-      }
-    }
-
-    /** If the idle time is 0 and the counter is more than 0, it means the user has been active during the last 0 second */
-    if (idleTime === 0 && i > 0) {
-      /** If the app has been idling, change the status to false*/
-      if (isIdle) {
-        isIdle = false;
-      }
-
-      /**
-       * Reset the idle counter.
-       * Setting it to -1 because we have i++ in the end of the for, which will return it to 0
-       */
-      i = -1;
     }
 
     /** Sleep 1 second */

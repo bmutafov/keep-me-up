@@ -9,6 +9,8 @@
     "ecmaVersion": "latest"
   },
   "rules": {
-    "no-constant-condition": "off"
+    "no-constant-condition": "off",
+    "no-unused-vars": "error",
+    "no-unused-labels": "warn"
   }
 }
